@@ -6,6 +6,7 @@ import { AlertService, CoreService, MongoService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/core/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
+import { environment } from '@environment/environment';
 
 @Component({
 	templateUrl: './stores.component.html',
@@ -117,7 +118,7 @@ export class StoresComponent {
 						]
 					},
 					{
-						name: 'Text',
+						name: 'Subdomain',
 						key: 'domain',
 						fields: [
 							{
@@ -127,6 +128,10 @@ export class StoresComponent {
 							{
 								name: 'Label',
 								value: 'Domain'
+							},
+							{
+								name: 'Subdomain',
+								value: environment.subdomain
 							}
 						]
 					},
