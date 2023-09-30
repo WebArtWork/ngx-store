@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormService } from 'src/app/modules/form/form.service';
-import { StoreService, Store } from 'src/app/core/services/store.service';
+import { StoreService, Store } from 'src/app/modules/store/services/store.service';
 import { FormInterface } from 'src/app/modules/form/interfaces/form.interface';
 import { AlertService, CoreService, MongoService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
