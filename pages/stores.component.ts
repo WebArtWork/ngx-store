@@ -4,7 +4,7 @@ import { StoreService, Store } from 'src/app/modules/store/services/store.servic
 import { FormInterface } from 'src/app/modules/form/interfaces/form.interface';
 import { AlertService, CoreService, MongoService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
-import { ThemeService } from 'src/app/core/services/theme.service';
+import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
 import { environment } from '@environment/environment';
 
