@@ -9,7 +9,8 @@ export interface Store {
 	markup: number;
 	description: string;
 	theme: string;
-	data: Record<string, unknown>
+	data: Record<string, unknown>,
+	variables: Record<string, unknown>
 }
 
 @Injectable({
