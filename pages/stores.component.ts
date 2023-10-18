@@ -7,6 +7,7 @@ import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
 import { environment } from '@environment/environment';
+import { FormComponentInterface } from '../../form/interfaces/component.interface';
 
 @Component({
 	templateUrl: './stores.component.html',
@@ -16,6 +17,8 @@ export class StoresComponent {
 	columns = ['name', 'description', 'domain', 'markup'];
 
 	form: FormInterface;
+
+	variables: FormComponentInterface[] = [];
 
 	config = {
 		create: () => {
@@ -30,9 +33,34 @@ export class StoresComponent {
 				.then(this._ss.create.bind(this));
 		},
 		update: (doc: Store) => {
+			this.variables.splice(0, this.variables.length);
+
+			for (const variable in doc.variables) {
+				(doc as unknown as Record<string, unknown>)['__' + variable] = doc.variables[variable];
+
+				this.variables.push({
+					name: 'Text',
+					key: '__' + variable,
+					fields: [
+						{
+							name: 'Placeholder',
+							value: 'fill your' + variable
+						},
+						{
+							name: 'Label',
+							value: variable
+						}
+					]
+				});
+			}
+
 			this._form
 				.modal<Store>(this.form, [], doc)
 				.then((updated: Store) => {
+					for (const variable in doc.variables) {
+						doc.variables[variable] = (doc as unknown as Record<string, unknown>)['__' + variable];
+					}
+
 					if (updated) {
 						this._core.copy(updated, doc);
 						this._ss.save(doc);
@@ -190,6 +218,10 @@ export class StoresComponent {
 								value: this._ts.themes
 							}
 						]
+					},
+					{
+						components: this.variables,
+						fields: []
 					}
 				]
 			});
