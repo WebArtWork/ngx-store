@@ -7,7 +7,7 @@ import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
 import { environment } from '@environment/environment';
-import { FormComponentInterface } from '../../form/interfaces/component.interface';
+import { FormComponentInterface, TemplateFieldInterface } from '../../form/interfaces/component.interface';
 
 @Component({
 	templateUrl: './stores.component.html',
@@ -19,23 +19,15 @@ export class StoresComponent {
 	form: FormInterface;
 
 	variables: FormComponentInterface[] = [];
+	setVariables(doc: Store = {} as Store) {
+		this.variables.splice(0, this.variables.length);
 
-	config = {
-		create: () => {
-			this._form
-				.modal<Store>(this.form, {
-					label: this._translate.translate('Common.Create'),
-					click: (created: unknown, close: () => void) => {
-						this._ss.create(created as Store);
-						close();
-					}
-				})
-				.then(this._ss.create.bind(this));
-		},
-		update: (doc: Store) => {
-			this.variables.splice(0, this.variables.length);
+		if (doc.theme) {
+			const variables = this._ts.doc(doc.theme).variables;
 
-			for (const variable in doc.variables) {
+			doc.variables = doc.variables || {};
+
+			for (const variable in variables) {
 				(doc as unknown as Record<string, unknown>)['__' + variable] = doc.variables[variable];
 
 				this.variables.push({
@@ -53,12 +45,31 @@ export class StoresComponent {
 					]
 				});
 			}
+		}
+	}
+
+	config = {
+		create: () => {
+			this.setVariables();
+
+			this._form
+				.modal<Store>(this.form, {
+					label: this._translate.translate('Common.Create'),
+					click: (created: unknown, close: () => void) => {
+						this._ss.create(created as Store);
+						close();
+					}
+				})
+				.then(this._ss.create.bind(this));
+		},
+		update: (doc: Store) => {
+			this.setVariables(doc);
 
 			this._form
 				.modal<Store>(this.form, [], doc)
 				.then((updated: Store) => {
-					for (const variable in doc.variables) {
-						doc.variables[variable] = (doc as unknown as Record<string, unknown>)['__' + variable];
+					for (const formVariable of this.variables) {
+						doc.variables[(formVariable.fields as TemplateFieldInterface[])[1].value as string] = (doc as unknown as Record<string, unknown>)[formVariable.key as string];
 					}
 
 					if (updated) {
