@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { FormService } from 'src/app/modules/form/form.service';
 import { StoreService, Store } from 'src/app/modules/store/services/store.service';
 import { FormInterface } from 'src/app/modules/form/interfaces/form.interface';
-import { AlertService, CoreService, MongoService } from 'wacom';
+import { AlertService, CoreService, MongoService, HttpService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
 import { environment } from '@environment/environment';
+import { Router } from '@angular/router';
 import { FormComponentInterface, TemplateFieldInterface } from '../../form/interfaces/component.interface';
 
 @Component({
@@ -97,9 +98,9 @@ export class StoresComponent {
 			});
 		}
 	};
-
+	stores: Store[] = [];
 	get rows(): Store[] {
-		return this._ss.stores;
+		return this._router.url === '/admin/stores' ? this.stores : this._ss.stores;
 	}
 
 	constructor(
@@ -108,10 +109,17 @@ export class StoresComponent {
 		private _mongo: MongoService,
 		private _form: FormService,
 		private _core: CoreService,
+		private _router: Router,
 		private _ts: ThemeService,
+		private _http: HttpService,
 		private _ss: StoreService,
 		private _tss: TagService
 	) {
+			if (this._router.url === '/admin/stores') {
+			this._http.get('/api/store/getadmin', (links: Store[]) => {
+				links.forEach((store: Store)=>this.stores.push(store));
+			});
+		}
 		this._mongo.on('theme', () => {
 			this.form = this._form.getForm('store', {
 				formId: 'store',
@@ -212,7 +220,7 @@ export class StoresComponent {
 							},
 							{
 								name: 'Items',
-								value: this._tss.group('product')
+								value: this._tss.group('store')
 							}
 						]
 					},
