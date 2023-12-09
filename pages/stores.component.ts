@@ -1,14 +1,20 @@
 import { Component } from '@angular/core';
 import { FormService } from 'src/app/modules/form/form.service';
-import { StoreService, Store } from 'src/app/modules/store/services/store.service';
+import {
+	StoreService,
+	Store
+} from 'src/app/modules/store/services/store.service';
 import { FormInterface } from 'src/app/modules/form/interfaces/form.interface';
-import { AlertService, CoreService, MongoService, HttpService } from 'wacom';
+import { AlertService, CoreService, MongoService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
-import { environment } from '@environment/environment';
-import { Router } from '@angular/router';
-import { FormComponentInterface, TemplateFieldInterface } from '../../form/interfaces/component.interface';
+import {
+	FormComponentInterface,
+	TemplateFieldInterface
+} from '../../form/interfaces/component.interface';
+import { ModalService } from '../../modal/modal.service';
+import { StoreDomainComponent } from './stores/store-domain/store-domain.component';
 
 @Component({
 	templateUrl: './stores.component.html',
@@ -29,7 +35,8 @@ export class StoresComponent {
 			doc.variables = doc.variables || {};
 
 			for (const variable in variables) {
-				(doc as unknown as Record<string, unknown>)['__' + variable] = doc.variables[variable];
+				(doc as unknown as Record<string, unknown>)['__' + variable] =
+					doc.variables[variable];
 
 				this.variables.push({
 					name: 'Text',
@@ -66,11 +73,18 @@ export class StoresComponent {
 		update: (doc: Store) => {
 			this.setVariables(doc);
 
+			console.log((this.form as any).components[7].fields[1].value);
+
 			this._form
 				.modal<Store>(this.form, [], doc)
 				.then((updated: Store) => {
 					for (const formVariable of this.variables) {
-						doc.variables[(formVariable.fields as TemplateFieldInterface[])[1].value as string] = (doc as unknown as Record<string, unknown>)[formVariable.key as string];
+						doc.variables[
+							(formVariable.fields as TemplateFieldInterface[])[1]
+								.value as string
+						] = (doc as unknown as Record<string, unknown>)[
+							formVariable.key as string
+							];
 					}
 
 					if (updated) {
@@ -96,11 +110,22 @@ export class StoresComponent {
 					}
 				]
 			});
-		}
+		},
+		buttons: [
+			{
+				icon: 'cloud_download',
+				click: (store: Store) => {
+					this._modal.show({
+						component: StoreDomainComponent,
+						store
+					});
+				}
+			}
+		]
 	};
-	stores: Store[] = [];
+
 	get rows(): Store[] {
-		return this._router.url === '/admin/stores' ? this.stores : this._ss.stores;
+		return this._ss.stores;
 	}
 
 	constructor(
@@ -109,18 +134,12 @@ export class StoresComponent {
 		private _mongo: MongoService,
 		private _form: FormService,
 		private _core: CoreService,
-		private _router: Router,
 		private _ts: ThemeService,
-		private _http: HttpService,
 		private _ss: StoreService,
-		private _tss: TagService
+		private _tss: TagService,
+		private _modal: ModalService
 	) {
-			if (this._router.url === '/admin/stores') {
-			this._http.get('/api/store/getadmin', (links: Store[]) => {
-				links.forEach((store: Store)=>this.stores.push(store));
-			});
-		}
-		this._mongo.on('theme', () => {
+		this._mongo.on('theme tag', () => {
 			this.form = this._form.getForm('store', {
 				formId: 'store',
 				title: 'Store',
@@ -165,7 +184,7 @@ export class StoresComponent {
 						]
 					},
 					{
-						name: 'Subdomain',
+						name: 'Text',
 						key: 'domain',
 						fields: [
 							{
@@ -175,10 +194,6 @@ export class StoresComponent {
 							{
 								name: 'Label',
 								value: 'Domain'
-							},
-							{
-								name: 'Subdomain',
-								value: environment.subdomain
 							}
 						]
 					},
@@ -221,6 +236,27 @@ export class StoresComponent {
 							{
 								name: 'Items',
 								value: this._tss.group('store')
+							}
+						]
+					},
+					{
+						name: 'Select',
+						key: 'headerTags',
+						fields: [
+							{
+								name: 'Placeholder',
+								value: 'Select tags'
+							},
+							{
+								name: 'Items',
+								value: this._core.splice(
+									this._tss.group('store'),
+									this._tss.tags
+								)
+							},
+							{
+								name: 'Multiple',
+								value: true
 							}
 						]
 					},

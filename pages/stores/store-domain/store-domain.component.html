@@ -1,0 +1,30 @@
+<h1>Change domain {{store.domain || ''}}</h1>
+
+<div *ngIf="ip">
+	<h3>Set domain settings</h3>
+	<table>
+		<thead>
+			<td>Type</td>
+			<td>Host</td>
+			<td>Value</td>
+		</thead>
+		<tr>
+			<td>A Record</td>
+			<td>*</td>
+			<td>{{ip}}</td>
+		</tr>
+		<tr>
+			<td>A Record</td>
+			<td>&#64;</td>
+			<td>{{ip}}</td>
+		</tr>
+	</table>
+</div>
+
+<winput
+	label="Custom domain"
+	placeholder="fill your domain"
+	(wChange)="domain = $event"
+></winput>
+
+<wbutton [disabled]="!domain" (wClick)="update()">Update</wbutton>
