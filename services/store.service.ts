@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '@environment/environment.prod';
 import { MongoService, AlertService } from 'wacom';
 
 export interface Store {
@@ -9,14 +10,33 @@ export interface Store {
 	markup: number;
 	description: string;
 	theme: string;
+	indexPage: string;
 	data: Record<string, unknown>,
 	variables: Record<string, unknown>
+}
+
+interface StoreConfig {
+	defaultIndexPage: string;
+	pageTitle: string;
+	docTitle: string;
+	pages: {
+		page: string;
+		url: string;
+		json: string;
+	}[];
 }
 
 @Injectable({
 	providedIn: 'root'
 })
 export class StoreService {
+	config = (environment as unknown as { store: StoreConfig }).store || {
+		defaultIndexPage: '',
+		pageTitle: 'Stores',
+		docTitle: 'Store',
+		pages: []
+	};
+
 	stores: Store[] = [];
 
 	_stores: any = {};

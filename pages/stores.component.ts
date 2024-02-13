@@ -5,92 +5,105 @@ import {
 	Store
 } from 'src/app/modules/store/services/store.service';
 import { FormInterface } from 'src/app/modules/form/interfaces/form.interface';
-import { AlertService, CoreService, MongoService } from 'wacom';
+import { AlertService, CoreService, HttpService, MongoService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
-import {
-	FormComponentInterface,
-	TemplateFieldInterface
-} from '../../form/interfaces/component.interface';
+import { FormComponentInterface } from '../../form/interfaces/component.interface';
 import { ModalService } from '../../modal/modal.service';
 import { StoreDomainComponent } from './stores/store-domain/store-domain.component';
+import { UserService } from 'src/app/core';
 
 @Component({
 	templateUrl: './stores.component.html',
 	styleUrls: ['./stores.component.scss']
 })
 export class StoresComponent {
-	columns = ['name', 'description', 'domain', 'markup'];
+	title = this._ss.config.pageTitle;
+
+	columns = ['enabled', 'name', 'domain'];
 
 	form: FormInterface;
 
 	variables: FormComponentInterface[] = [];
+	formVariables: FormInterface = this._form.getForm('variables', {
+		formId: 'variables',
+		title: 'Variables',
+		components: this.variables
+	});
+	fetchedTheme: string;
 	setVariables(doc: Store = {} as Store) {
 		this.variables.splice(0, this.variables.length);
 
-		if (doc.theme) {
-			const variables = this._ts.doc(doc.theme).variables;
-
-			doc.variables = doc.variables || {};
-
-			for (const variable in variables) {
-				(doc as unknown as Record<string, unknown>)['__' + variable] =
-					doc.variables[variable];
-
-				this.variables.push({
-					name: 'Text',
-					key: '__' + variable,
-					fields: [
-						{
-							name: 'Placeholder',
-							value: 'fill your' + variable
-						},
-						{
-							name: 'Label',
-							value: variable
+		if (doc.theme && this.fetchedTheme !== doc.theme) {
+			this.fetchedTheme = doc.theme;
+			this._http.get(
+				`/api/theme/template/variables/${doc.theme}`,
+				(resp) => {
+					let focused = true;
+					doc.variables = doc.variables || {};
+					for (const variable in resp.variables) {
+						const name = resp.variablesInfo[variable]?.name || 'Text';
+						this.variables.push({
+							focused: focused && name === 'Text' ? true : false,
+							key: variable,
+							root: true,
+							name,
+							fields: [
+								{
+									name: 'Placeholder',
+									value: 'fill ' + variable
+								},
+								{
+									name: 'Label',
+									value: variable
+								}
+							]
+						});
+						if (name === 'Text') {
+							focused = false;
 						}
-					]
-				});
-			}
+
+						doc.variables[variable] =
+							typeof doc.variables[variable] === 'undefined'
+								? resp.variables[variable]
+								: doc.variables[variable];
+					}
+				}
+			);
 		}
 	}
 
 	config = {
 		create: () => {
-			this.setVariables();
-
 			this._form
-				.modal<Store>(this.form, {
-					label: this._translate.translate('Common.Create'),
-					click: (created: unknown, close: () => void) => {
-						this._ss.create(created as Store);
-						close();
-					}
-				})
+				.modal<Store>(
+					this.form,
+					{
+						label: this._translate.translate('Common.Create'),
+						click: (created: unknown, close: () => void) => {
+							this._ss.create(created as Store);
+							close();
+						}
+					},
+					this._ss.config.defaultIndexPage
+						? {
+								indexPage: this._ss.config.defaultIndexPage
+						  }
+						: {}
+				)
 				.then(this._ss.create.bind(this));
 		},
 		update: (doc: Store) => {
-			this.setVariables(doc);
-
-			console.log((this.form as any).components[7].fields[1].value);
-
 			this._form
 				.modal<Store>(this.form, [], doc)
 				.then((updated: Store) => {
-					for (const formVariable of this.variables) {
-						doc.variables[
-							(formVariable.fields as TemplateFieldInterface[])[1]
-								.value as string
-						] = (doc as unknown as Record<string, unknown>)[
-							formVariable.key as string
-							];
-					}
-
 					if (updated) {
 						this._core.copy(updated, doc);
 						this._ss.save(doc);
 					}
+
+					this.setVariables(doc as Store);
 				});
 		},
 		delete: (doc: Store) => {
@@ -113,6 +126,22 @@ export class StoresComponent {
 		},
 		buttons: [
 			{
+				icon: 'text_fields',
+				click: (store: Store) => {
+					store.variables = store.variables || {};
+					this._form
+						.modal<Record<string, unknown>>(
+							this.formVariables,
+							[],
+							store.variables
+						)
+						.then((updated: Record<string, unknown>) => {
+							this._core.copy(updated, store.variables);
+							this._ss.save(store);
+						});
+				}
+			},
+			{
 				icon: 'cloud_download',
 				click: (store: Store) => {
 					this._modal.show({
@@ -128,21 +157,41 @@ export class StoresComponent {
 		return this._ss.stores;
 	}
 
+	update(store: Store) {
+		this._ss.update(store);
+	}
+
 	constructor(
 		private _translate: TranslateService,
 		private _alert: AlertService,
+		private _http: HttpService,
 		private _mongo: MongoService,
 		private _form: FormService,
 		private _core: CoreService,
 		private _ts: ThemeService,
 		private _ss: StoreService,
 		private _tss: TagService,
-		private _modal: ModalService
+		private _modal: ModalService,
+		private _us: UserService
 	) {
+		if (this._us.role('agent')) {
+			this.columns.push('location');
+		}
+		this._mongo.on('store theme', () => {
+			for (const doc of this.rows) {
+				this.setVariables(doc);
+			}
+		});
 		this._mongo.on('theme tag', () => {
+			const pages = this._ss.config.pages.map((p) => {
+				return {
+					_id: p.page,
+					name: p.page
+				};
+			});
 			this.form = this._form.getForm('store', {
 				formId: 'store',
-				title: 'Store',
+				title: this._ss.config.docTitle,
 				components: [
 					{
 						name: 'Photo',
@@ -185,6 +234,20 @@ export class StoresComponent {
 					},
 					{
 						name: 'Text',
+						key: 'location',
+						fields: [
+							{
+								name: 'Placeholder',
+								value: 'fill location'
+							},
+							{
+								name: 'Label',
+								value: 'Location'
+							}
+						]
+					},
+					{
+						name: 'Text',
 						key: 'domain',
 						fields: [
 							{
@@ -197,69 +260,83 @@ export class StoresComponent {
 							}
 						]
 					},
-					{
-						name: 'Text',
-						key: 'website',
-						fields: [
-							{
-								name: 'Placeholder',
-								value: 'fill your website'
-							},
-							{
-								name: 'Label',
-								value: 'Website'
-							}
-						]
-					},
-					{
-						name: 'Number',
-						key: 'markup',
-						fields: [
-							{
-								name: 'Placeholder',
-								value: 'fill your markup'
-							},
-							{
-								name: 'Label',
-								value: 'Markup'
-							}
-						]
-					},
+					// {
+					// 	name: 'Text',
+					// 	key: 'website',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'fill your website'
+					// 		},
+					// 		{
+					// 			name: 'Label',
+					// 			value: 'Website'
+					// 		}
+					// 	]
+					// },
+					// {
+					// 	name: 'Number',
+					// 	key: 'markup',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'fill your markup'
+					// 		},
+					// 		{
+					// 			name: 'Label',
+					// 			value: 'Markup'
+					// 		}
+					// 	]
+					// },
 					{
 						name: 'Select',
-						key: 'tag',
+						key: 'indexPage',
 						fields: [
 							{
 								name: 'Placeholder',
-								value: 'Select tag'
+								value: 'Select default page'
 							},
 							{
 								name: 'Items',
-								value: this._tss.group('store')
+								value: pages
 							}
 						]
 					},
-					{
-						name: 'Select',
-						key: 'headerTags',
-						fields: [
-							{
-								name: 'Placeholder',
-								value: 'Select tags'
-							},
-							{
-								name: 'Items',
-								value: this._core.splice(
-									this._tss.group('store'),
-									this._tss.tags
-								)
-							},
-							{
-								name: 'Multiple',
-								value: true
-							}
-						]
-					},
+					// {
+					// 	name: 'Select',
+					// 	key: 'tag',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'Select tag'
+					// 		},
+					// 		{
+					// 			name: 'Items',
+					// 			value: this._tss.group('store')
+					// 		}
+					// 	]
+					// },
+					// {
+					// 	name: 'Select',
+					// 	key: 'headerTags',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'Select tags'
+					// 		},
+					// 		{
+					// 			name: 'Items',
+					// 			value: this._core.splice(
+					// 				this._tss.group('store'),
+					// 				this._tss.tags
+					// 			)
+					// 		},
+					// 		{
+					// 			name: 'Multiple',
+					// 			value: true
+					// 		}
+					// 	]
+					// },
 					{
 						name: 'Select',
 						key: 'theme',
@@ -270,13 +347,9 @@ export class StoresComponent {
 							},
 							{
 								name: 'Items',
-								value: this._ts.themes
+								value: this._ts.byModule['store']
 							}
 						]
-					},
-					{
-						components: this.variables,
-						fields: []
 					}
 				]
 			});

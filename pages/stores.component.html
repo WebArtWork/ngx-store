@@ -1,6 +1,14 @@
 <wtable
-	title="Stores"
 	[columns]="columns"
 	[config]="config"
+	[title]="title"
 	[rows]="rows"
-></wtable>
+>
+	<ng-template cell="enabled" let-element>
+		<winput
+			(wChange)="element.enabled = $event; update(element)"
+			[value]="element.enabled"
+			type="checkbox"
+		></winput>
+	</ng-template>
+</wtable>
