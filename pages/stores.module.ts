@@ -3,6 +3,8 @@ import { CoreModule } from 'src/app/core';
 import { StoresComponent } from './stores.component';
 import { Routes, RouterModule } from '@angular/router';
 import { StoreDomainComponent } from './stores/store-domain/store-domain.component';
+import { QrCodeModule } from 'ng-qrcode';
+import { StoreQrcodeComponent } from './stores/store-qrcode/store-qrcode.component';
 
 const routes: Routes = [{
 	path: '',
@@ -12,11 +14,13 @@ const routes: Routes = [{
 @NgModule({
 	imports: [
 		RouterModule.forChild(routes),
+		QrCodeModule,
 		CoreModule
 	],
 	declarations: [
+		StoreDomainComponent,
 		StoresComponent,
-		StoreDomainComponent
+  StoreQrcodeComponent
 	],
 	providers: []
 

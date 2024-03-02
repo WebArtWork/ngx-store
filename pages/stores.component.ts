@@ -13,6 +13,7 @@ import { FormComponentInterface } from '../../form/interfaces/component.interfac
 import { ModalService } from '../../modal/modal.service';
 import { StoreDomainComponent } from './stores/store-domain/store-domain.component';
 import { UserService } from 'src/app/core';
+import { StoreQrcodeComponent } from './stores/store-qrcode/store-qrcode.component';
 
 @Component({
 	templateUrl: './stores.component.html',
@@ -20,11 +21,8 @@ import { UserService } from 'src/app/core';
 })
 export class StoresComponent {
 	title = this._ss.config.pageTitle;
-
 	columns = ['enabled', 'name', 'domain'];
-
 	form: FormInterface;
-
 	variables: FormComponentInterface[] = [];
 	formVariables: FormInterface = this._form.getForm('variables', {
 		formId: 'variables',
@@ -149,6 +147,15 @@ export class StoresComponent {
 						store
 					});
 				}
+			},
+			{
+				icon: 'qr_code',
+				click: (store: Store) => {
+					this._modal.show({
+						component: StoreQrcodeComponent,
+						store
+					});
+				}
 			}
 		]
 	};
@@ -232,20 +239,20 @@ export class StoresComponent {
 							}
 						]
 					},
-					{
-						name: 'Text',
-						key: 'location',
-						fields: [
-							{
-								name: 'Placeholder',
-								value: 'fill location'
-							},
-							{
-								name: 'Label',
-								value: 'Location'
-							}
-						]
-					},
+					// {
+					// 	name: 'Text',
+					// 	key: 'location',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'fill location'
+					// 		},
+					// 		{
+					// 			name: 'Label',
+					// 			value: 'Location'
+					// 		}
+					// 	]
+					// },
 					{
 						name: 'Text',
 						key: 'domain',
@@ -288,20 +295,20 @@ export class StoresComponent {
 					// 		}
 					// 	]
 					// },
-					{
-						name: 'Select',
-						key: 'indexPage',
-						fields: [
-							{
-								name: 'Placeholder',
-								value: 'Select default page'
-							},
-							{
-								name: 'Items',
-								value: pages
-							}
-						]
-					},
+					// {
+					// 	name: 'Select',
+					// 	key: 'indexPage',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'Select default page'
+					// 		},
+					// 		{
+					// 			name: 'Items',
+					// 			value: pages
+					// 		}
+					// 	]
+					// },
 					// {
 					// 	name: 'Select',
 					// 	key: 'tag',

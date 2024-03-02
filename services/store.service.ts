@@ -4,6 +4,8 @@ import { MongoService, AlertService } from 'wacom';
 
 export interface Store {
 	_id: string;
+	author: string;
+	moderators: string[];
 	active: boolean;
 	name: string;
 	domain: string;

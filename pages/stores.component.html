@@ -1,14 +1,12 @@
-<wtable
-	[columns]="columns"
-	[config]="config"
-	[title]="title"
-	[rows]="rows"
->
+<wtable [columns]="columns" [config]="config" [title]="title" [rows]="rows">
 	<ng-template cell="enabled" let-element>
 		<winput
 			(wChange)="element.enabled = $event; update(element)"
 			[value]="element.enabled"
 			type="checkbox"
 		></winput>
+	</ng-template>
+	<ng-template cell="domain" let-element>
+		<a href="https://{{element.domain}}" target="_blank">{{element.domain}}</a>
 	</ng-template>
 </wtable>
