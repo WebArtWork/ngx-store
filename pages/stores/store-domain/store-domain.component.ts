@@ -3,6 +3,7 @@ import { Store } from '../../../services/store.service';
 import { environment } from 'src/environments/environment';
 import { HttpService } from 'wacom';
 import { AlertService } from 'src/app/modules/alert/alert.service';
+import { ConfigService } from 'src/app/core/services/config.service';
 
 @Component({
 	selector: 'app-store-domain',
@@ -17,8 +18,9 @@ export class StoreDomainComponent {
 	store: Store;
 
 	constructor(
-		private _http: HttpService,
-		private _alert: AlertService
+		public config: ConfigService,
+		private _alert: AlertService,
+		private _http: HttpService
 	){}
 
 	update() {
@@ -27,7 +29,7 @@ export class StoreDomainComponent {
 			domain: this.domain
 		}, (resp) => {
 			if (resp.updated) {
-				this.store.domain = this.domain;
+				this.store.domain = resp.updated;
 			}
 
 			if (resp.text) {

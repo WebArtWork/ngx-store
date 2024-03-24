@@ -2,9 +2,10 @@ import { NgModule } from '@angular/core';
 import { CoreModule } from 'src/app/core';
 import { StoresComponent } from './stores.component';
 import { Routes, RouterModule } from '@angular/router';
-import { StoreDomainComponent } from './stores/store-domain/store-domain.component';
+import { StoreDomainComponent } from './store-domain/store-domain.component';
 import { QrCodeModule } from 'ng-qrcode';
-import { StoreQrcodeComponent } from './stores/store-qrcode/store-qrcode.component';
+import { StoreQrcodeComponent } from './store-qrcode/store-qrcode.component';
+import { StoreTransferComponent } from './store-transfer/store-transfer.component';
 
 const routes: Routes = [{
 	path: '',
@@ -20,7 +21,8 @@ const routes: Routes = [{
 	declarations: [
 		StoreDomainComponent,
 		StoresComponent,
-  StoreQrcodeComponent
+  StoreQrcodeComponent,
+  StoreTransferComponent
 	],
 	providers: []
 

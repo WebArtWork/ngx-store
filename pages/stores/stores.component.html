@@ -6,6 +6,12 @@
 			type="checkbox"
 		></winput>
 	</ng-template>
+	<ng-template cell="author" let-element>
+		{{us.doc(element.author).email}}
+	</ng-template>
+	<ng-template cell="agent" let-element>
+		{{element.agent ? us.doc(element.agent).email : ''}}
+	</ng-template>
 	<ng-template cell="domain" let-element>
 		<a href="https://{{element.domain}}" target="_blank">{{element.domain}}</a>
 	</ng-template>

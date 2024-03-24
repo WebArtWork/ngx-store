@@ -1,0 +1,11 @@
+<h1>{{title}}</h1>
+<wselect
+	placeholder="Select new user"
+	(modelChange)="userId=$event"
+	searchableBy="name email"
+	[searchable]="true"
+	[items]="us.users"
+	name="email"
+></wselect>
+<wbutton (click)="changeOwnership()">Change ownership</wbutton>
+<wbutton (click)="changeAgent()" *ngIf="us.role('admin')">Change agent</wbutton>

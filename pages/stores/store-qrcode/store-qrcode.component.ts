@@ -7,6 +7,5 @@ import { Store } from '../../../services/store.service';
   styleUrl: './store-qrcode.component.scss'
 })
 export class StoreQrcodeComponent {
-	domain = window.location.host;
 	store: Store;
 }

@@ -9,11 +9,13 @@ import { AlertService, CoreService, HttpService, MongoService } from 'wacom';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
 import { ThemeService } from 'src/app/modules/theme/services/theme.service';
 import { TagService } from 'src/app/modules/tag/services/tag.service';
-import { FormComponentInterface } from '../../form/interfaces/component.interface';
-import { ModalService } from '../../modal/modal.service';
-import { StoreDomainComponent } from './stores/store-domain/store-domain.component';
+import { FormComponentInterface } from '../../../form/interfaces/component.interface';
+import { ModalService } from '../../../modal/modal.service';
+import { StoreDomainComponent } from './store-domain/store-domain.component';
 import { UserService } from 'src/app/core';
-import { StoreQrcodeComponent } from './stores/store-qrcode/store-qrcode.component';
+import { StoreQrcodeComponent } from './store-qrcode/store-qrcode.component';
+import { StoreTransferComponent } from './store-transfer/store-transfer.component';
+import { Planfeature, PlanfeatureService } from 'src/app/modules/plan/services/planfeature.service';
 
 @Component({
 	templateUrl: './stores.component.html',
@@ -22,6 +24,7 @@ import { StoreQrcodeComponent } from './stores/store-qrcode/store-qrcode.compone
 export class StoresComponent {
 	title = this._ss.config.pageTitle;
 	columns = ['enabled', 'name', 'domain'];
+	features: Planfeature[] = [];
 	form: FormInterface;
 	variables: FormComponentInterface[] = [];
 	formVariables: FormInterface = this._form.getForm('variables', {
@@ -31,9 +34,9 @@ export class StoresComponent {
 	});
 	fetchedTheme: string;
 	setVariables(doc: Store = {} as Store) {
-		this.variables.splice(0, this.variables.length);
-
 		if (doc.theme && this.fetchedTheme !== doc.theme) {
+			this.variables.splice(0, this.variables.length);
+			this.features.splice(0, this.features.length);
 			this.fetchedTheme = doc.theme;
 			this._http.get(
 				`/api/theme/template/variables/${doc.theme}`,
@@ -41,7 +44,8 @@ export class StoresComponent {
 					let focused = true;
 					doc.variables = doc.variables || {};
 					for (const variable in resp.variables) {
-						const name = resp.variablesInfo[variable]?.name || 'Text';
+						const name =
+							resp.variablesInfo[variable]?.name || 'Text';
 						this.variables.push({
 							focused: focused && name === 'Text' ? true : false,
 							key: variable,
@@ -69,6 +73,12 @@ export class StoresComponent {
 					}
 				}
 			);
+
+			this.features.splice(0, this.features.length);
+			const theme = this._ts.doc(doc.theme);
+			for (const featureId of theme.features) {
+				this.features.push(this._ufs.doc(featureId));
+			}
 		}
 	}
 
@@ -156,7 +166,18 @@ export class StoresComponent {
 						store
 					});
 				}
-			}
+			},
+			this.us.role('agent') || this.us.role('admin')
+				? {
+						icon: 'people',
+						click: (store: Store) => {
+							this._modal.show({
+								component: StoreTransferComponent,
+								store
+							});
+						}
+				  }
+				: null
 		]
 	};
 
@@ -170,19 +191,28 @@ export class StoresComponent {
 
 	constructor(
 		private _translate: TranslateService,
+		private _ufs: PlanfeatureService,
 		private _alert: AlertService,
-		private _http: HttpService,
 		private _mongo: MongoService,
+		private _modal: ModalService,
+		private _http: HttpService,
 		private _form: FormService,
 		private _core: CoreService,
 		private _ts: ThemeService,
 		private _ss: StoreService,
 		private _tss: TagService,
-		private _modal: ModalService,
-		private _us: UserService
+		public us: UserService
 	) {
-		if (this._us.role('agent')) {
+		if (
+			this.us.role('agent') &&
+			!this.us.role('admin')
+		) {
 			this.columns.push('location');
+			this.columns.push('author');
+		}
+		if (this.us.role('admin')) {
+			this.columns.push('author');
+			this.columns.push('agent');
 		}
 		this._mongo.on('store theme', () => {
 			for (const doc of this.rows) {
@@ -239,6 +269,24 @@ export class StoresComponent {
 							}
 						]
 					},
+					{
+						name: 'Select',
+						key: 'features',
+						fields: [
+							{
+								name: 'Placeholder',
+								value: 'Select features'
+							},
+							{
+								name: 'Items',
+								value: this.features
+							},
+							{
+								name: 'Multiple',
+								value: true
+							}
+						]
+					},
 					// {
 					// 	name: 'Text',
 					// 	key: 'location',
@@ -253,20 +301,20 @@ export class StoresComponent {
 					// 		}
 					// 	]
 					// },
-					{
-						name: 'Text',
-						key: 'domain',
-						fields: [
-							{
-								name: 'Placeholder',
-								value: 'fill your domain'
-							},
-							{
-								name: 'Label',
-								value: 'Domain'
-							}
-						]
-					},
+					// {
+					// 	name: 'Text',
+					// 	key: 'domain',
+					// 	fields: [
+					// 		{
+					// 			name: 'Placeholder',
+					// 			value: 'fill your domain'
+					// 		},
+					// 		{
+					// 			name: 'Label',
+					// 			value: 'Domain'
+					// 		}
+					// 	]
+					// },
 					// {
 					// 	name: 'Text',
 					// 	key: 'website',
