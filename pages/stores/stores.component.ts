@@ -203,16 +203,14 @@ export class StoresComponent {
 		private _tss: TagService,
 		public us: UserService
 	) {
-		if (
-			this.us.role('agent') &&
-			!this.us.role('admin')
-		) {
-			this.columns.push('location');
-			this.columns.push('author');
-		}
 		if (this.us.role('admin')) {
 			this.columns.push('author');
 			this.columns.push('agent');
+		} else if (
+			this.us.role('agent')
+		) {
+			this.columns.push('location');
+			this.columns.push('author');
 		}
 		this._mongo.on('store theme', () => {
 			for (const doc of this.rows) {

@@ -7,25 +7,21 @@ import { QrCodeModule } from 'ng-qrcode';
 import { StoreQrcodeComponent } from './store-qrcode/store-qrcode.component';
 import { StoreTransferComponent } from './store-transfer/store-transfer.component';
 
-const routes: Routes = [{
-	path: '',
-	component: StoresComponent
-}];
+const routes: Routes = [
+	{
+		path: '',
+		component: StoresComponent
+	}
+];
 
 @NgModule({
-	imports: [
-		RouterModule.forChild(routes),
-		QrCodeModule,
-		CoreModule
-	],
+	imports: [RouterModule.forChild(routes), QrCodeModule, CoreModule],
 	declarations: [
 		StoreDomainComponent,
 		StoresComponent,
-  StoreQrcodeComponent,
-  StoreTransferComponent
+		StoreQrcodeComponent,
+		StoreTransferComponent
 	],
 	providers: []
-
 })
-
-export class StoresModule { }
+export class StoresModule {}
