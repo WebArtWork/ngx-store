@@ -76,7 +76,7 @@ export class StoresComponent {
 
 			this.features.splice(0, this.features.length);
 			const theme = this._ts.doc(doc.theme);
-			for (const featureId of theme.features) {
+			for (const featureId of (theme.features || [])) {
 				this.features.push(this._ufs.doc(featureId));
 			}
 		}
