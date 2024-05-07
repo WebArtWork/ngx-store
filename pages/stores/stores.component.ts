@@ -230,6 +230,24 @@ export class StoresComponent {
 				components: [
 					{
 						name: 'Photo',
+						key: 'favicon',
+						fields: [
+							{
+								name: 'Label',
+								value: 'Favicon'
+							},
+							{
+								name: 'Width',
+								value: 64
+							},
+							{
+								name: 'Height',
+								value: 64
+							}
+						]
+					},
+					{
+						name: 'Photo',
 						key: 'thumb',
 						fields: [
 							{
@@ -403,7 +421,21 @@ export class StoresComponent {
 								value: this._ts.byModule['store']
 							}
 						]
-					}
+					},
+					{
+						name: 'Text',
+						key: 'currency',
+						fields: [
+							{
+								name: 'Placeholder',
+								value: 'fill custom currency'
+							},
+							{
+								name: 'Label',
+								value: 'Currency'
+							}
+						]
+					},
 				]
 			});
 		});
