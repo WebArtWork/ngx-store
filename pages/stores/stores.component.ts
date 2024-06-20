@@ -12,10 +12,10 @@ import { TagService } from 'src/app/modules/tag/services/tag.service';
 import { FormComponentInterface } from '../../../form/interfaces/component.interface';
 import { ModalService } from '../../../modal/modal.service';
 import { StoreDomainComponent } from './store-domain/store-domain.component';
-import { UserService } from 'src/app/core';
 import { StoreQrcodeComponent } from './store-qrcode/store-qrcode.component';
 import { StoreTransferComponent } from './store-transfer/store-transfer.component';
 import { Planfeature, PlanfeatureService } from 'src/app/modules/plan/services/planfeature.service';
+import { UserService } from 'src/app/modules/user/services/user.service';
 
 @Component({
 	templateUrl: './stores.component.html',

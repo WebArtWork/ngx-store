@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Store } from '../../../services/store.service';
 import { AlertService, HttpService } from 'wacom';
-import { UserService } from 'src/app/core';
 import { TranslateService } from 'src/app/modules/translate/translate.service';
+import { UserService } from 'src/app/modules/user/services/user.service';
 
 @Component({
 	selector: 'app-store-transfer',

@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { CoreModule } from 'src/app/core';
+import { CoreModule } from 'src/app/core/core.module';
 import { StoresComponent } from './stores.component';
 import { Routes, RouterModule } from '@angular/router';
 import { StoreDomainComponent } from './store-domain/store-domain.component';
