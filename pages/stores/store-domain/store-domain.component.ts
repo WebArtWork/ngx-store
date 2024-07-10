@@ -3,7 +3,7 @@ import { Store } from '../../../services/store.service';
 import { environment } from 'src/environments/environment';
 import { HttpService } from 'wacom';
 import { AlertService } from 'src/app/modules/alert/alert.service';
-import { ConfigService } from 'src/app/core/services/config.service';
+import { ConfigService } from 'src/app/modules/config/config.service';
 
 @Component({
 	selector: 'app-store-domain',

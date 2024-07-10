@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { environment } from '@environment/environment.prod';
+import { environment } from 'src/environments/environment';
+
 import { MongoService, AlertService } from 'wacom';
 
 export interface Store {
